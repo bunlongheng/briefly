@@ -83,8 +83,8 @@ export default function Menu({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: 18,
+          gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
+          gap: 14,
         }}
       >
         {books.map((b) => (
@@ -100,11 +100,11 @@ export default function Menu({
               textAlign: "left",
               background: "var(--card)",
               border: "1px solid var(--sub-alt)",
-              borderRadius: 14,
-              padding: 14,
+              borderRadius: 12,
+              padding: 9,
               display: "flex",
               flexDirection: "column",
-              gap: 12,
+              gap: 9,
               cursor: "pointer",
               transition: "transform .15s ease, border-color .15s ease, background .15s ease",
             }}
@@ -120,11 +120,11 @@ export default function Menu({
                 }}
                 style={{
                   position: "absolute",
-                  top: 10,
-                  right: 10,
-                  width: 30,
-                  height: 30,
-                  borderRadius: 8,
+                  top: 8,
+                  right: 8,
+                  width: 26,
+                  height: 26,
+                  borderRadius: 7,
                   display: "grid",
                   placeItems: "center",
                   background: "color-mix(in srgb, var(--bg-deep) 78%, transparent)",
@@ -146,8 +146,9 @@ export default function Menu({
             <div style={{ minWidth: 0 }}>
               <div
                 style={{
-                  fontSize: 14,
+                  fontSize: 12.5,
                   fontWeight: 700,
+                  lineHeight: 1.25,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -158,18 +159,22 @@ export default function Menu({
               <div
                 className="dim"
                 style={{
-                  fontSize: 12,
+                  fontSize: 10.5,
                   marginTop: 3,
                   display: "flex",
-                  gap: 8,
+                  gap: 6,
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}
               >
-                <span>{b.author || "unknown"}</span>
-                <span>·</span>
                 <span>{mmss(b.duration_sec ?? 0)}</span>
+                {b.author ? (
+                  <>
+                    <span>·</span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{b.author}</span>
+                  </>
+                ) : null}
                 {!b.has_audio ? <span style={{ color: "var(--error)" }}>· no audio</span> : null}
               </div>
             </div>

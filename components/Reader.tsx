@@ -254,14 +254,26 @@ export default function Reader({
           bottom: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14, maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: 900, margin: "0 auto" }}>
+          <button
+            onClick={() => seekTo((audioRef.current?.currentTime || 0) - 10)}
+            className="skip-btn focus-ring"
+            aria-label="Back 10 seconds"
+            title="Back 10s"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M11 8L6 12l5 4V8zM18 8l-5 4 5 4V8z" fill="currentColor" stroke="none" />
+            </svg>
+            <span className="skip-num">10</span>
+          </button>
+
           <button
             onClick={toggle}
             className="focus-ring"
             aria-label={playing ? "Pause" : "Play"}
             style={{
-              width: 42,
-              height: 42,
+              width: 44,
+              height: 44,
               borderRadius: 999,
               background: "var(--main)",
               color: "var(--bg)",
@@ -271,15 +283,27 @@ export default function Reader({
             }}
           >
             {playing ? (
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
                 <rect x="6" y="5" width="4" height="14" rx="1" />
                 <rect x="14" y="5" width="4" height="14" rx="1" />
               </svg>
             ) : (
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
                 <path d="M8 5l11 7-11 7z" />
               </svg>
             )}
+          </button>
+
+          <button
+            onClick={() => seekTo((audioRef.current?.currentTime || 0) + 10)}
+            className="skip-btn focus-ring"
+            aria-label="Forward 10 seconds"
+            title="Forward 10s"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M13 8l5 4-5 4V8zM6 8l5 4-5 4V8z" fill="currentColor" stroke="none" />
+            </svg>
+            <span className="skip-num">10</span>
           </button>
 
           <span className="dim" style={{ fontSize: 12, width: 40, textAlign: "right" }}>{mmss(cur)}</span>
@@ -341,6 +365,19 @@ export default function Reader({
       />
 
       <style>{`
+        .skip-btn {
+          position: relative;
+          width: 40px; height: 40px;
+          display: grid; place-items: center;
+          color: var(--sub); flex-shrink: 0;
+          transition: color .15s ease;
+        }
+        .skip-btn:hover { color: var(--main); }
+        .skip-btn .skip-num {
+          position: absolute; bottom: 3px; left: 0; right: 0;
+          text-align: center; font-size: 8px; font-weight: 700;
+          pointer-events: none;
+        }
         .k-word { transition: color .12s ease; }
         .k-text .k-word:hover { color: var(--main) !important; }
         .k-caret {
