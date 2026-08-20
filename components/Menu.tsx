@@ -1,0 +1,153 @@
+"use client";
+
+import type { Book } from "@/lib/types";
+import { mmss } from "@/lib/types";
+import Cover from "./Cover";
+
+function Feature({ k, children }: { k: string; children: React.ReactNode }) {
+  return (
+    <li style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+      <span className="accent" style={{ fontWeight: 700, flexShrink: 0 }}>
+        {k}
+      </span>
+      <span style={{ color: "var(--text)" }}>{children}</span>
+    </li>
+  );
+}
+
+function EmptyState({ onAdd }: { onAdd: () => void }) {
+  return (
+    <div style={{ maxWidth: 620, margin: "6vh auto 0", animation: "rise .4s ease" }}>
+      <div className="dim" style={{ fontSize: 13, marginBottom: 8 }}>
+        {"// no books yet"}
+      </div>
+      <h1 style={{ fontSize: "clamp(26px, 5vw, 40px)", margin: "0 0 8px", fontWeight: 800, letterSpacing: "-0.01em" }}>
+        read along, <span className="accent">out loud</span>.
+      </h1>
+      <p className="dim" style={{ fontSize: 15, lineHeight: 1.7, margin: "0 0 26px" }}>
+        briefly turns any text into a narrated, karaoke-style read-along. paste a chapter, an
+        article, or your own writing - hear it spoken and follow every word as it lands.
+      </p>
+      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px", display: "grid", gap: 14, fontSize: 15 }}>
+        <Feature k="01">real voice narration with natural, warm delivery</Feature>
+        <Feature k="02">per-word karaoke highlight, synced to the exact audio moment</Feature>
+        <Feature k="03">click any word to jump straight to it - scrub by meaning, not seconds</Feature>
+        <Feature k="04">adjustable speed, light + dark, works great on your phone</Feature>
+      </ul>
+      <button
+        onClick={onAdd}
+        className="focus-ring"
+        style={{
+          background: "var(--main)",
+          color: "var(--bg)",
+          fontWeight: 700,
+          padding: "12px 22px",
+          borderRadius: 10,
+          fontSize: 15,
+        }}
+      >
+        paste your first text →
+      </button>
+    </div>
+  );
+}
+
+export default function Menu({
+  books,
+  loading,
+  onOpen,
+  onAdd,
+}: {
+  books: Book[];
+  loading: boolean;
+  onOpen: (b: Book) => void;
+  onAdd: () => void;
+}) {
+  if (loading) {
+    return (
+      <p className="dim" style={{ textAlign: "center", marginTop: "20vh" }}>
+        loading…
+      </p>
+    );
+  }
+  if (books.length === 0) return <EmptyState onAdd={onAdd} />;
+
+  return (
+    <div style={{ maxWidth: 1040, margin: "0 auto", animation: "rise .3s ease" }}>
+      <div className="dim" style={{ fontSize: 13, margin: "0 4px 16px" }}>
+        {"// "}
+        {books.length} book{books.length === 1 ? "" : "s"}
+      </div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gap: 18,
+        }}
+      >
+        {books.map((b) => (
+          <button
+            key={b.id}
+            onClick={() => onOpen(b)}
+            className="book-card focus-ring"
+            style={{
+              textAlign: "left",
+              background: "var(--card)",
+              border: "1px solid var(--sub-alt)",
+              borderRadius: 14,
+              padding: 14,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              transition: "transform .15s ease, border-color .15s ease, background .15s ease",
+            }}
+          >
+            <Cover
+              id={b.id}
+              title={b.title}
+              className="book-cover"
+              style={{ width: "100%", aspectRatio: "3 / 4", borderRadius: 9, objectFit: "cover" }}
+            />
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {b.title}
+              </div>
+              <div
+                className="dim"
+                style={{
+                  fontSize: 12,
+                  marginTop: 3,
+                  display: "flex",
+                  gap: 8,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                <span>{b.author || "unknown"}</span>
+                <span>·</span>
+                <span>{mmss(b.duration_sec ?? 0)}</span>
+                {!b.has_audio ? <span style={{ color: "var(--error)" }}>· no audio</span> : null}
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+      <style>{`
+        .book-card:hover {
+          transform: translateY(-3px);
+          border-color: var(--main);
+          background: var(--card-hi);
+        }
+      `}</style>
+    </div>
+  );
+}

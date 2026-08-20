@@ -1,0 +1,34 @@
+{
+  "name": "briefly",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 9877",
+    "build": "next build",
+    "start": "next start -p 9877",
+    "typecheck": "tsc --noEmit",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "export:manifest": "tsx scripts/export-manifest.ts",
+    "prepare": "husky || true"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "husky": "^9",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.2",
+    "typescript": "^5",
+    "vitest": "^4.1.11"
+  }
+}
