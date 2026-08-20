@@ -111,7 +111,7 @@ export default function App() {
           display: "flex",
           alignItems: "center",
           gap: 12,
-          padding: "18px 22px",
+          padding: "calc(16px + env(safe-area-inset-top)) max(22px, env(safe-area-inset-right)) 16px max(22px, env(safe-area-inset-left))",
           maxWidth: 1040,
           margin: "0 auto",
           width: "100%",

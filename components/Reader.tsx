@@ -183,8 +183,12 @@ export default function Reader({
           display: "flex",
           alignItems: "center",
           gap: 12,
-          padding: "16px 20px",
+          padding: "calc(14px + env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 14px max(20px, env(safe-area-inset-left))",
           borderBottom: "1px solid var(--sub-alt)",
+          background: "var(--bg)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
         }}
       >
         <button

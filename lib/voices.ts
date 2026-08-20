@@ -10,6 +10,8 @@ export const VOICES: Voice[] = [
   { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", desc: "Clear British female" },
   { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", desc: "Soft, cozy female" },
   { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", desc: "Deep, calm male" },
+  { id: "pNInz6obpgDQGcFmaJgB", name: "Adam", desc: "Deep, dominant, firm - leader" },
+  { id: "nPczCjzI2devNBz1zQrb", name: "Brian", desc: "Deep, resonant, authoritative" },
 ];
 
 // Pure default (no env read here - this module is imported client-side too).
