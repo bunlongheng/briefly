@@ -1,37 +1,99 @@
 # Briefly
 
-> Paste any text, hear it read aloud, and follow along word-by-word - karaoke style.
+Paste any text, hear it read aloud, and follow along word-by-word - karaoke style, with the caret landing on the exact letter being spoken.
 
-Briefly turns any text into a narrated, monkeytype-style read-along. Paste a chapter,
-an article, or your own writing; Briefly synthesizes a natural voice and highlights
-every word at the exact moment it is spoken - down to the character.
+![Briefly reader](docs/screenshots/reader.png)
 
-![Briefly reader](docs/demo-reader.png)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![React](https://img.shields.io/badge/React-19-149eca?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript)
+![Tests](https://img.shields.io/badge/tests-28%20passing-3fb950)
+![Vulnerabilities](https://img.shields.io/badge/vulns-0-3fb950)
+
+## Contents
+
+- [Features](#features)
+- [Why it feels seamless](#why-it-feels-seamless)
+- [Architecture](#architecture)
+- [How it works](#how-it-works)
+- [Tech stack](#tech-stack)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Project layout](#project-layout)
+- [License](#license)
+
+## Features
+
+- Real voice narration (ElevenLabs), warm and natural
+- Per-character karaoke highlight synced to the exact audio moment - not a word-length guess
+- Click any word to jump straight to it - scrub by meaning, not seconds
+- Adjustable speed (0.75x-2x), light + dark themes, keyboard control (space / esc / arrows)
+- Long text is chunked on sentence boundaries and stitched back into one seamless track
+- Mobile-first, installable (PWA), deep-linkable books (`/?b=<id>&t=<seconds>`)
 
 ## Why it feels seamless
 
-The karaoke highlight is driven by **real per-character timestamps** from the
-text-to-speech engine, not a word-length estimate. At any playback moment the reader
-binary-searches the timing array for the active character, so the caret lands on the
-exact letter being spoken. Click any word to jump straight to it.
+The highlight is driven by **real per-character timestamps** from the text-to-speech
+engine, not an estimate. At any playback moment the reader binary-searches the timing
+array for the active character, so the caret sits on the exact letter being spoken.
 
-- Real voice narration (ElevenLabs), warm and natural
-- Per-character karaoke highlight synced to the audio
-- Click-to-seek by word, adjustable speed, light + dark themes
-- Long text is chunked on sentence boundaries and stitched back into one seamless track
-- Mobile-first, installable (PWA), keyboard-friendly (space / esc / arrows)
+![Library](docs/screenshots/library.png)
+
+## Architecture
+
+A thin Next.js app: pure logic lives in `lib/` (and is unit-tested), the React reader
+lives in `components/`, and the API route synthesizes audio. Audio and per-character
+timing are written under `public/` and served as static files, so the deployed app
+needs no writable database - it reads a committed `books.json` manifest.
+
+```mermaid
+flowchart LR
+    R["Reader (React)<br/>karaoke UI"] -->|POST paste / GET list| A["Next API<br/>/api/books"]
+    A -->|with-timestamps| E["ElevenLabs<br/>TTS + char timing"]
+    A -->|insert / query| S["SQLite<br/>books (local)"]
+    A -->|write mp3 + alignment| P["public/ static<br/>mp3 + json + manifest"]
+    R -.->|GET audio + books.json| P
+```
+
+| Module | Role |
+| --- | --- |
+| `lib/karaoke.ts` | playback-time -> active char/word model (tested) |
+| `lib/elevenlabs.ts` | TTS synth, sentence chunking, audio + timing stitch |
+| `lib/db.ts` / `lib/manifest.ts` | sqlite schema + static manifest export |
+| `lib/auth.ts` | local/LAN or bearer-token write gate |
+| `components/Reader.tsx` + `KaraokeText.tsx` | reader UI + memoized highlight |
+| `app/api/books` | create (synthesize) + list + delete |
+
+## How it works
+
+```mermaid
+sequenceDiagram
+    participant U as You
+    participant API as /api/books
+    participant EL as ElevenLabs
+    participant FS as public/
+    U->>API: paste text
+    API->>EL: synthesize (chunked, with-timestamps)
+    EL-->>API: audio + per-character times
+    API->>FS: write {id}.mp3 + {id}.json
+    U->>FS: fetch audio + alignment
+    Note over U: charIndexAt(starts, t) -> caret on the exact letter
+```
 
 ## Tech stack
 
-- **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript**
+- **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript** (strict)
 - **Tailwind CSS v4**
 - **better-sqlite3** for local storage; a static `public/books.json` manifest for serverless
 - **ElevenLabs** `with-timestamps` TTS for audio + character alignment
-- **Vitest** for unit tests
+- **Vitest** + **Testing Library** for unit, integration, and component-render tests
 
-## Getting started
+## Quick start
 
 ```bash
+git clone https://github.com/bunlongheng/briefly.git
+cd briefly
 npm install
 cp .env.example .env.local   # add your ELEVENLABS_API_KEY
 npm run dev                  # http://localhost:9877
@@ -40,48 +102,35 @@ npm run dev                  # http://localhost:9877
 Open the app, click **+ add**, paste your text, pick a voice, and hit **add + narrate**.
 Briefly generates the audio + word timing and opens the reader.
 
-### Environment
+## Configuration
 
-| Var | Required | Purpose |
+| Env var | Default | Purpose |
 | --- | --- | --- |
-| `ELEVENLABS_API_KEY` | yes (for audio) | text-to-speech + character timing |
-| `BRIEFLY_VOICE_ID` | no | default narrator voice |
-| `BRIEFLY_TOKEN` | no | bearer token for remote `POST /api/books` |
+| `ELEVENLABS_API_KEY` | - | required for audio + per-character timing |
+| `BRIEFLY_VOICE_ID` | Rachel | default narrator voice id |
+| `BRIEFLY_TOKEN` | (empty) | bearer token required for remote `POST /api/books`; empty = local/LAN only |
+| `NEXT_PUBLIC_SITE_URL` | Vercel URL | canonical site URL for OpenGraph/metadata |
 
-## How it works
+## Project layout
 
 ```
-paste text ──▶ POST /api/books ──▶ ElevenLabs (with-timestamps)
-                                        │
-                    ┌───────────────────┴───────────────────┐
-                    ▼                                        ▼
-        public/audio/{id}.mp3                    public/audio/{id}.json
-        (streamed with Range support)      { text, starts[], ends[] } per char
-                    │                                        │
-                    └──────────────▶ Reader ◀────────────────┘
-                         charIndexAt(starts, t) → active char → caret
+app/
+  api/books/        create (synthesize) + list + delete
+  layout.tsx        theme set pre-paint, metadata, PWA
+  page.tsx          library <-> reader shell
+components/
+  Reader.tsx        audio + rAF caret + transport
+  KaraokeText.tsx   memoized per-paragraph highlight
+  Menu.tsx          book grid + empty-state pitch
+  AddBook.tsx       paste -> narrate modal
+lib/
+  karaoke.ts        playback-time -> active char/word (tested)
+  elevenlabs.ts     TTS synth + chunk/stitch
+  db.ts manifest.ts sqlite + static manifest
+  auth.ts           write gate
+tests/              vitest: unit + integration + render (28)
 ```
-
-Audio and alignment are written under `public/` so they are served as static files
-with native HTTP Range / 206 support (required by iOS Safari `<audio>`). A committed
-`public/books.json` manifest lets the deployed app work without a writable database.
-
-## Scripts
-
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | dev server on :9877 |
-| `npm run build` | production build |
-| `npm test` | unit tests (karaoke sync, chunking) |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run export:manifest` | regenerate `public/books.json` from the local DB |
-
-## Deploy
-
-Deploys to Vercel. The app reads the committed `public/books.json` + static audio
-on serverless; adding new books is done locally (where the sqlite DB is writable),
-then `public/books.json` + `public/audio/*` are committed and pushed.
 
 ## License
 
-MIT
+[MIT](LICENSE) (c) Bunlong Heng
