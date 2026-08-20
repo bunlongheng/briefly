@@ -13,6 +13,9 @@ export default function App() {
   const [open, setOpen] = useState<Book | null>(null);
   const [startAt, setStartAt] = useState(0);
   const [adding, setAdding] = useState(false);
+  // true only when the writable local API served the data - the static public
+  // deploy reads books.json, where add/delete would just 401. Gates the UI.
+  const [canManage, setCanManage] = useState(false);
   const [theme, toggleTheme] = useTheme();
 
   const load = useCallback(async () => {
@@ -29,6 +32,7 @@ export default function App() {
         if (Array.isArray(d)) {
           if (d.length) {
             setBooks(d);
+            setCanManage(url === "/api/books");
             setLoading(false);
             return;
           }
@@ -41,6 +45,18 @@ export default function App() {
     setBooks(manifest);
     setLoading(false);
   }, []);
+
+  const onDelete = useCallback(
+    async (id: number) => {
+      try {
+        const r = await fetch(`/api/books/${id}`, { method: "DELETE" });
+        if (r.ok) await load();
+      } catch {
+        /* ignore - stays on the list */
+      }
+    },
+    [load],
+  );
 
   useEffect(() => {
     load();
@@ -136,7 +152,13 @@ export default function App() {
       </header>
 
       <main style={{ flex: 1, padding: "10px 22px 60px", width: "100%" }}>
-        <Menu books={books} loading={loading} onOpen={setOpen} onAdd={() => setAdding(true)} />
+        <Menu
+          books={books}
+          loading={loading}
+          onOpen={setOpen}
+          onAdd={() => setAdding(true)}
+          onDelete={canManage ? onDelete : undefined}
+        />
       </main>
 
       {adding && <AddBook onClose={() => setAdding(false)} onAdded={onAdded} />}

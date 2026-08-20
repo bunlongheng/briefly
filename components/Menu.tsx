@@ -57,11 +57,13 @@ export default function Menu({
   loading,
   onOpen,
   onAdd,
+  onDelete,
 }: {
   books: Book[];
   loading: boolean;
   onOpen: (b: Book) => void;
   onAdd: () => void;
+  onDelete?: (id: number) => void;
 }) {
   if (loading) {
     return (
@@ -86,11 +88,15 @@ export default function Menu({
         }}
       >
         {books.map((b) => (
-          <button
+          <div
             key={b.id}
+            role="button"
+            tabIndex={0}
             onClick={() => onOpen(b)}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen(b)}
             className="book-card focus-ring"
             style={{
+              position: "relative",
               textAlign: "left",
               background: "var(--card)",
               border: "1px solid var(--sub-alt)",
@@ -99,9 +105,38 @@ export default function Menu({
               display: "flex",
               flexDirection: "column",
               gap: 12,
+              cursor: "pointer",
               transition: "transform .15s ease, border-color .15s ease, background .15s ease",
             }}
           >
+            {onDelete && (
+              <button
+                className="book-del focus-ring"
+                aria-label={`Delete ${b.title}`}
+                title="Delete"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm(`Delete "${b.title}"? This removes its audio too.`)) onDelete(b.id);
+                }}
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
+                  display: "grid",
+                  placeItems: "center",
+                  background: "color-mix(in srgb, var(--bg-deep) 78%, transparent)",
+                  color: "var(--sub)",
+                  backdropFilter: "blur(2px)",
+                }}
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6" />
+                </svg>
+              </button>
+            )}
             <Cover
               id={b.id}
               title={b.title}
@@ -138,7 +173,7 @@ export default function Menu({
                 {!b.has_audio ? <span style={{ color: "var(--error)" }}>· no audio</span> : null}
               </div>
             </div>
-          </button>
+          </div>
         ))}
       </div>
       <style>{`
@@ -147,6 +182,10 @@ export default function Menu({
           border-color: var(--main);
           background: var(--card-hi);
         }
+        .book-del { opacity: 0; transition: opacity .15s ease, color .15s ease, background .15s ease; }
+        .book-card:hover .book-del, .book-del:focus-visible { opacity: 1; }
+        .book-del:hover { color: var(--error); }
+        @media (hover: none) { .book-del { opacity: 1; } }
       `}</style>
     </div>
   );
