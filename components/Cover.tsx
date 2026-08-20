@@ -42,7 +42,6 @@ export default function Cover({
       </div>
     );
   }
-  // eslint-disable-next-line @next/next/no-img-element
   return (
     <img
       src={`/covers/${id}.png`}

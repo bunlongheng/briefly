@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start -p 9877",
     "typecheck": "tsc --noEmit",
-    "lint": "next lint",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "export:manifest": "tsx scripts/export-manifest.ts",
@@ -20,11 +20,14 @@
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.1",
     "husky": "^9",
     "tailwindcss": "^4",
     "tsx": "^4.19.2",

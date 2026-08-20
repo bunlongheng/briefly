@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AlignFile, Book } from "@/lib/types";
 import { mmss } from "@/lib/types";
-import { activeWordNumber, buildKaraoke, charIndexAt, wordState } from "@/lib/karaoke";
+import { activeWordNumber, buildKaraoke, charIndexAt } from "@/lib/karaoke";
+import KaraokeText from "@/components/KaraokeText";
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
@@ -96,11 +97,14 @@ export default function Reader({
     return () => cancelAnimationFrame(raf);
   }, [playing, starts]);
 
-  // keep the active line centered
-  const activeWordRef = useRef<HTMLSpanElement>(null);
+  // keep the active line centered - target the memoized word via a data attribute
+  // so the scroll logic stays decoupled from the render tree
+  const stageRef = useRef<HTMLDivElement>(null);
   const wordNo = activeWordNumber(kara, activeChar);
   useEffect(() => {
-    activeWordRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    stageRef.current
+      ?.querySelector("[data-active]")
+      ?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [wordNo]);
 
   const applyRate = useCallback((r: number) => {
@@ -162,44 +166,6 @@ export default function Reader({
 
   const pct = dur ? (cur / dur) * 100 : 0;
 
-  // render a word given the active-char position
-  let flat = -1;
-  const renderWord = (tok: { w: string; ci: number }) => {
-    flat++;
-    const { state, typed } = wordState(tok, activeChar);
-    const isActive = state === "active";
-    const color =
-      state === "done" ? "var(--text)" : state === "future" ? "var(--sub)" : "var(--text)";
-    return (
-      <span
-        key={tok.ci}
-        ref={isActive ? activeWordRef : null}
-        onClick={() => seekWord(tok.ci)}
-        className="k-word"
-        style={{ color, cursor: "pointer" }}
-      >
-        {isActive
-          ? [...tok.w].map((ch, j) => {
-              const isCurrent = j === typed - 1;
-              const spoken = j < typed - 1;
-              return (
-                <span key={j} style={{ position: "relative" }}>
-                  {isCurrent && <span className="k-caret" aria-hidden="true" />}
-                  <span
-                    style={{
-                      color: isCurrent ? "var(--error)" : spoken ? "var(--text)" : "var(--sub)",
-                    }}
-                  >
-                    {ch}
-                  </span>
-                </span>
-              );
-            })
-          : tok.w}{" "}
-      </span>
-    );
-  };
-
   return (
     <div
       style={{
@@ -253,7 +219,10 @@ export default function Reader({
           padding: "10vh 20px 22vh",
         }}
       >
-        <div style={{ width: "min(760px, 100%)", maxWidth: "100%", margin: "0 auto" }}>
+        <div
+          ref={stageRef}
+          style={{ width: "min(760px, 100%)", maxWidth: "100%", margin: "0 auto" }}
+        >
           <div
             className="accent"
             style={{ fontSize: 26, fontWeight: 700, marginBottom: 18, letterSpacing: "0.02em" }}
@@ -263,6 +232,8 @@ export default function Reader({
           </div>
           {!ready ? (
             <p className="dim">loading…</p>
+          ) : kara.paras.length === 0 ? (
+            <p className="dim">no text.</p>
           ) : (
             <div
               className="k-text"
@@ -274,11 +245,7 @@ export default function Reader({
                 wordBreak: "break-word",
               }}
             >
-              {kara.paras.map((row, pi) => (
-                <p key={pi} style={{ margin: "0 0 1.1em" }}>
-                  {row.map(renderWord)}
-                </p>
-              ))}
+              <KaraokeText paras={kara.paras} activeChar={activeChar} onSeekWord={seekWord} />
             </div>
           )}
         </div>
