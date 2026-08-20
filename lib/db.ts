@@ -24,9 +24,17 @@ CREATE TABLE IF NOT EXISTS books (
   word_count   INTEGER,
   char_count   INTEGER,
   cover_prompt TEXT,
+  published    INTEGER DEFAULT 1,
   created_at   TEXT DEFAULT (datetime('now'))
 );
 `);
+
+// migration for older DBs: add the publish flag (local-only vs on the site)
+try {
+  db.exec("ALTER TABLE books ADD COLUMN published INTEGER DEFAULT 1");
+} catch {
+  /* column already exists */
+}
 
 // on-disk paths (written by the API) + public URLs (read by the browser)
 export const audioPath = (id: number | string) => join(PUB_AUDIO, `${id}.mp3`);
@@ -46,6 +54,7 @@ export type BookRow = {
   word_count: number | null;
   char_count: number | null;
   cover_prompt: string | null;
+  published: number;
   created_at: string;
 };
 

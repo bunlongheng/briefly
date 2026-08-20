@@ -14,3 +14,11 @@ next-env.d.ts
 
 # vercel
 .vercel
+
+# local-only books (kept on disk for the local app, never shipped to the static site)
+/public/audio/1.mp3
+/public/audio/1.json
+/public/audio/3.mp3
+/public/audio/3.json
+/public/audio/4.mp3
+/public/audio/4.json

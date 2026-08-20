@@ -77,6 +77,15 @@ export default function Reader({
     if (a) a.currentTime = startAt;
   }, [ready, starts, startAt]);
 
+  // Autoplay on open - the tap that opened the reader is the user gesture, so
+  // browsers allow it (iOS is best-effort; the play button remains as fallback).
+  const autoplayed = useRef(false);
+  useEffect(() => {
+    if (autoplayed.current || !ready || !book.has_audio) return;
+    autoplayed.current = true;
+    audioRef.current?.play().then(() => setPlaying(true)).catch(() => {});
+  }, [ready, book.has_audio]);
+
   // Smooth caret: while playing, read audio time each frame and only re-render
   // when the active CHARACTER changes (keeps long books cheap).
   useEffect(() => {
@@ -193,15 +202,13 @@ export default function Reader({
       >
         <button
           onClick={onBack}
-          className="focus-ring"
-          style={{ color: "var(--sub)", fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--main)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--sub)")}
+          className="back-btn focus-ring"
+          aria-label="Back to library"
+          title="Back"
         >
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 18l-6-6 6-6" />
           </svg>
-          esc
         </button>
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -369,6 +376,18 @@ export default function Reader({
       />
 
       <style>{`
+        .back-btn {
+          width: 44px; height: 44px;
+          border-radius: 999px;
+          display: grid; place-items: center;
+          flex-shrink: 0;
+          color: var(--text);
+          background: var(--card-hi);
+          border: 1px solid var(--sub-alt);
+          transition: background .15s ease, color .15s ease, border-color .15s ease, transform .1s ease;
+        }
+        .back-btn:hover { color: var(--main); border-color: var(--main); }
+        .back-btn:active { transform: scale(0.94); }
         .skip-btn {
           position: relative;
           width: 40px; height: 40px;

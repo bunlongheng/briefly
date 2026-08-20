@@ -141,7 +141,7 @@ export default function Menu({
               id={b.id}
               title={b.title}
               className="book-cover"
-              style={{ width: "100%", aspectRatio: "3 / 4", borderRadius: 9, objectFit: "cover" }}
+              style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: 10, objectFit: "cover" }}
             />
             <div style={{ minWidth: 0 }}>
               <div
