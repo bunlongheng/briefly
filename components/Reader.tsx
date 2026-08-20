@@ -223,13 +223,6 @@ export default function Reader({
           ref={stageRef}
           style={{ width: "min(760px, 100%)", maxWidth: "100%", margin: "0 auto" }}
         >
-          <div
-            className="accent"
-            style={{ fontSize: 26, fontWeight: 700, marginBottom: 18, letterSpacing: "0.02em" }}
-            aria-hidden="true"
-          >
-            {wordNo || 0}
-          </div>
           {!ready ? (
             <p className="dim">loading…</p>
           ) : kara.paras.length === 0 ? (
