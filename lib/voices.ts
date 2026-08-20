@@ -3,6 +3,7 @@
 export type Voice = { id: string; name: string; desc: string };
 
 export const VOICES: Voice[] = [
+  { id: "CiFCWMnwjJGp46Pc0F6e", name: "Bunlong", desc: "My cloned voice" },
   { id: "21m00Tcm4TlvDq8ikWAM", name: "Rachel", desc: "Clear, natural, realistic" },
   { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", desc: "Soft, warm, gentle" },
   { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", desc: "Warm friendly narrator" },
