@@ -15,7 +15,7 @@ export type Alignment = {
 
 export type Synth = { audio: Buffer; alignment: Alignment; duration: number };
 
-const MODEL_ID = "eleven_turbo_v2_5"; // warm + natural, cheaper credits
+const MODEL_ID = "eleven_multilingual_v2"; // warmer + more expressive than turbo
 const CHUNK_CHARS = 2200; // stay well under model input limits per request
 
 // Split text into chunks <= CHUNK_CHARS, preferring sentence then word breaks
@@ -53,9 +53,9 @@ async function synthChunk(text: string, voiceId: string, key: string): Promise<S
         text,
         model_id: MODEL_ID,
         voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.0,
+          stability: 0.35, // lower = livelier, more expressive delivery (not flat)
+          similarity_boost: 0.8,
+          style: 0.3, // a touch of style makes it warm and engaged, not robotic
           use_speaker_boost: true,
         },
       }),

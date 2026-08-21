@@ -10,7 +10,7 @@ export function writeManifest(): void {
   // Only PUBLISHED books ship to the static site; unpublished ones stay local.
   const rows = db
     .prepare(
-      "SELECT id,title,author,body,voice_id,voice_name,has_audio,duration_sec,word_count,char_count,cover_prompt,published,created_at FROM books WHERE published=1 ORDER BY id DESC",
+      "SELECT id,title,author,body,voice_id,voice_name,has_audio,duration_sec,word_count,char_count,cover_prompt,published,music,created_at FROM books WHERE published=1 ORDER BY id DESC",
     )
     .all() as BookRow[];
   const out = join(process.cwd(), "public", "books.json");

@@ -10,6 +10,7 @@ export type Book = {
   word_count: number | null;
   char_count: number | null;
   cover_prompt: string | null;
+  music?: number;
   created_at: string;
   has_cover?: number;
 };
