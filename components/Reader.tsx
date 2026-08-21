@@ -25,6 +25,7 @@ export default function Reader({
   const [playing, setPlaying] = useState(false);
   const [rate, setRate] = useState(1);
   const [ready, setReady] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Load per-character alignment. Fall back to a linear estimate over the body
   // text if the file is missing (e.g. audio was generated without timestamps).
@@ -115,6 +116,31 @@ export default function Reader({
       ?.querySelector("[data-active]")
       ?.scrollIntoView({ block: "center", behavior: "smooth" });
   }, [wordNo]);
+
+  // share the clean per-book URL - its OG card shows the cover (story-time style)
+  const share = useCallback(async () => {
+    const url = `${window.location.origin}/b/${book.id}`;
+    const data = {
+      title: book.title,
+      text: `${book.title}${book.author ? ` by ${book.author}` : ""} - listen on Briefly`,
+      url,
+    };
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share(data);
+        return;
+      }
+    } catch {
+      return; // user cancelled the native sheet
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* clipboard blocked - nothing to do */
+    }
+  }, [book.id, book.title, book.author]);
 
   const applyRate = useCallback((r: number) => {
     setRate(r);
@@ -219,6 +245,38 @@ export default function Reader({
         <span className="dim" style={{ marginLeft: "auto", fontSize: 12, whiteSpace: "nowrap" }}>
           {book.voice_name}
         </span>
+        <button
+          onClick={share}
+          className="back-btn focus-ring"
+          aria-label="Share this book"
+          title={copied ? "Link copied" : "Share"}
+          style={{ position: "relative" }}
+        >
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+          </svg>
+          {copied && (
+            <span
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                right: 0,
+                fontSize: 11,
+                fontWeight: 700,
+                whiteSpace: "nowrap",
+                padding: "5px 9px",
+                borderRadius: 7,
+                background: "var(--main)",
+                color: "var(--bg)",
+              }}
+            >
+              link copied
+            </span>
+          )}
+        </button>
       </header>
 
       {/* karaoke stage */}
