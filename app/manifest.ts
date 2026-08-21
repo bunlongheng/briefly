@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Briefly",
     short_name: "Briefly",
-    description: "Paste any text, hear it read aloud, follow along karaoke-style.",
+    description: "Great books, in 5 minutes. Press play and follow along - every word lit up as it lands.",
     start_url: "/",
     display: "standalone",
     background_color: "#111112",
