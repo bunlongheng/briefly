@@ -5,6 +5,7 @@ import type { AlignFile, Book } from "@/lib/types";
 import { mmss } from "@/lib/types";
 import { activeWordNumber, buildKaraoke, charIndexAt } from "@/lib/karaoke";
 import KaraokeText from "@/components/KaraokeText";
+import Cover from "@/components/Cover";
 
 const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
 
@@ -236,6 +237,11 @@ export default function Reader({
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
+        <Cover
+          id={book.id}
+          title={book.title}
+          style={{ width: 40, height: 40, borderRadius: 8, objectFit: "cover", flexShrink: 0, fontSize: 8 }}
+        />
         <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {book.title}
