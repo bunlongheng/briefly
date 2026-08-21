@@ -62,12 +62,12 @@ export default function App() {
     load();
   }, [load]);
 
-  // deep link: /?b=<id>[&t=<seconds>] opens straight into a book (shareable)
+  // deep link: /b/<id> or /?b=<id>[&t=<seconds>] opens straight into a book
   const deepLinked = useRef(false);
   useEffect(() => {
     if (deepLinked.current || loading) return;
     const q = new URLSearchParams(window.location.search);
-    const id = q.get("b");
+    const id = q.get("b") ?? window.location.pathname.match(/^\/b\/(\d+)/)?.[1] ?? null;
     if (!id) return;
     deepLinked.current = true;
     const b = books.find((x) => String(x.id) === id);
