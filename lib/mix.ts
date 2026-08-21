@@ -41,7 +41,10 @@ export function mixWithBed(voicePath: string, durationSec: number): Promise<bool
     };
     let proc;
     try {
-      proc = spawn(FFMPEG, args);
+      // turbopackIgnore stops Turbopack from statically tracing this dynamic
+      // spawn, which otherwise pulls the ENTIRE public/ folder (all book audio)
+      // into the serverless function bundle and blows Vercel's size limit.
+      proc = spawn(/*turbopackIgnore: true*/ FFMPEG, args);
     } catch {
       return finish(false);
     }
