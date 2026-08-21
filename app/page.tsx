@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Book } from "@/lib/types";
 import Menu from "@/components/Menu";
 import Reader from "@/components/Reader";
-import AddBook from "@/components/AddBook";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
 export default function App() {
@@ -12,7 +11,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<Book | null>(null);
   const [startAt, setStartAt] = useState(0);
-  const [adding, setAdding] = useState(false);
   // true only when the writable local API served the data - the static public
   // deploy reads books.json, where add/delete would just 401. Gates the UI.
   const [canManage, setCanManage] = useState(false);
@@ -78,20 +76,6 @@ export default function App() {
     }
   }, [books, loading]);
 
-  const onAdded = useCallback(
-    async (id: number) => {
-      setAdding(false);
-      await load();
-      try {
-        const r = await fetch(`/api/books/${id}`, { cache: "no-store" });
-        if (r.ok) setOpen((await r.json()) as Book);
-      } catch {
-        /* stay on menu if fetch fails */
-      }
-    },
-    [load],
-  );
-
   if (open)
     return (
       <Reader
@@ -125,28 +109,6 @@ export default function App() {
           </span>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
-          <button
-            onClick={() => setAdding(true)}
-            className="focus-ring"
-            style={{
-              color: "var(--sub)",
-              fontSize: 13,
-              fontWeight: 700,
-              padding: "8px 14px",
-              borderRadius: 8,
-              border: "1px solid var(--sub-alt)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--main)";
-              e.currentTarget.style.borderColor = "var(--main)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--sub)";
-              e.currentTarget.style.borderColor = "var(--sub-alt)";
-            }}
-          >
-            + add
-          </button>
           <ThemeToggle theme={theme} onToggle={toggleTheme} />
         </div>
       </header>
@@ -156,12 +118,9 @@ export default function App() {
           books={books}
           loading={loading}
           onOpen={setOpen}
-          onAdd={() => setAdding(true)}
           onDelete={canManage ? onDelete : undefined}
         />
       </main>
-
-      {adding && <AddBook onClose={() => setAdding(false)} onAdded={onAdded} />}
     </div>
   );
 }
