@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
   if (!body) return NextResponse.json({ error: "body required" }, { status: 400 });
 
   const voiceId = String(b.voice_id || process.env.BRIEFLY_VOICE_ID || FALLBACK_VOICE);
-  const music = b.music === false ? 0 : 1; // ambient bed on by default
+  const music = b.music === true ? 1 : 0; // clean narration by default; bed only if explicitly asked
   const info = db
     .prepare(
       "INSERT INTO books (title,author,body,voice_id,voice_name,duration_sec,word_count,char_count,music) VALUES (?,?,?,?,?,?,?,?,?)",

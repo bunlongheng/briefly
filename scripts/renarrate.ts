@@ -23,7 +23,6 @@ if (!process.env.ELEVENLABS_API_KEY) {
 
 import db, { audioPath, alignPath, type BookRow } from "@/lib/db";
 import { synthesizeBook } from "@/lib/elevenlabs";
-import { mixWithBed } from "@/lib/mix";
 import { voiceName } from "@/lib/voices";
 import { writeManifest } from "@/lib/manifest";
 
@@ -45,7 +44,7 @@ async function run() {
   console.log(`re-narrating #${id} "${row!.title}" in ${voiceName(voiceId)} ...`);
   const { audio, alignment, duration } = await synthesizeBook(row!.body, voiceId);
   writeFileSync(audioPath(id), audio);
-  const mixed = await mixWithBed(audioPath(id), duration);
+  // no ambient bed: narration stays clean (bed was too distracting)
 
   const round = (n: number) => Math.round(n * 1000) / 1000;
   writeFileSync(
@@ -59,10 +58,10 @@ async function run() {
     }),
   );
   db.prepare(
-    "UPDATE books SET has_audio=1, duration_sec=?, voice_id=?, voice_name=?, music=1 WHERE id=?",
+    "UPDATE books SET has_audio=1, duration_sec=?, voice_id=?, voice_name=?, music=0 WHERE id=?",
   ).run(Math.round(duration), voiceId, voiceName(voiceId), id);
   writeManifest();
-  console.log(`done: ${Math.round(duration)}s, bed ${mixed ? "mixed" : "skipped (no ffmpeg?)"}`);
+  console.log(`done: ${Math.round(duration)}s, clean narration (no bed)`);
 }
 
 run().catch((e) => {

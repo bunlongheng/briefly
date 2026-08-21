@@ -181,29 +181,12 @@ export default async function Image() {
           </div>
 
           <div style={{ display: "flex", fontSize: 48, fontWeight: 800, color: "#fff", marginTop: 18, lineHeight: 1.08, letterSpacing: -1.5 }}>
-            Great books, in 5 minutes.
+            Don&apos;t have time for the whole book? How about 5 minutes?
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", fontSize: 27, color: TEXT, marginTop: 16, lineHeight: 1.45, maxWidth: 560 }}>
-            <span>No time for the whole book? Get the big ideas out loud, with </span>
+            <span>The big ideas read aloud, with </span>
             <span style={{ color: YELLOW }}>&nbsp;every word&nbsp;</span>
             <span> lit up as it lands.</span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignSelf: "flex-start",
-              marginTop: 32,
-              padding: "12px 22px",
-              borderRadius: 999,
-              background: "rgba(226,183,20,0.12)",
-              border: "1px solid rgba(226,183,20,0.35)",
-              color: YELLOW,
-              fontSize: 21,
-              fontWeight: 600,
-            }}
-          >
-            big ideas · 5 minutes · read along
           </div>
         </div>
       </div>

@@ -10,14 +10,14 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Briefly - great books in 5 minutes",
-    description: "No time for the whole book? Get the big ideas read aloud, with every word lit up as it lands.",
+    description: "Don't have time for the whole book? How about 5 minutes? The big ideas read aloud, with every word lit up as it lands.",
     siteName: "Briefly",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Briefly - great books in 5 minutes",
-    description: "No time for the whole book? Get the big ideas read aloud, with every word lit up as it lands.",
+    description: "Don't have time for the whole book? How about 5 minutes? The big ideas read aloud, with every word lit up as it lands.",
   },
   appleWebApp: { capable: true, title: "Briefly", statusBarStyle: "black-translucent" },
   other: { "apple-mobile-web-app-capable": "yes" },

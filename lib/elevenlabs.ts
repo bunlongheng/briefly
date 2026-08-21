@@ -45,7 +45,7 @@ export function chunkText(text: string, max = CHUNK_CHARS): string[] {
 
 async function synthChunk(text: string, voiceId: string, key: string): Promise<Synth> {
   const res = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps?output_format=mp3_44100_128`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps?output_format=mp3_44100_192`,
     {
       method: "POST",
       headers: { "xi-api-key": key, "content-type": "application/json" },
