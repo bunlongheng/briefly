@@ -15,6 +15,7 @@ export default function AddBook({
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [voice, setVoice] = useState(VOICES[0].id);
+  const [music, setMusic] = useState(true); // soft ambient bed under the voice
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -43,6 +44,7 @@ export default function AddBook({
           title: title.trim() || "Untitled",
           author: author.trim() || null,
           voice_id: voice,
+          music,
           body: body.trim(),
         }),
       });
@@ -138,6 +140,26 @@ export default function AddBook({
               </option>
             ))}
           </select>
+
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontSize: 13,
+              color: "var(--sub)",
+              cursor: busy ? "default" : "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={music}
+              onChange={(e) => setMusic(e.target.checked)}
+              disabled={busy}
+              style={{ accentColor: "var(--main)", width: 16, height: 16 }}
+            />
+            ambient bed - a soft, ducked soundtrack under the narration
+          </label>
 
           <textarea
             ref={areaRef}

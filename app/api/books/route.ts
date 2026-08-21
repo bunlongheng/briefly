@@ -3,6 +3,7 @@ import { existsSync, writeFileSync } from "fs";
 import { join } from "path";
 import db, { audioPath, alignPath, type BookRow } from "@/lib/db";
 import { synthesizeBook, estimateSeconds } from "@/lib/elevenlabs";
+import { mixWithBed } from "@/lib/mix";
 import { authorized } from "@/lib/auth";
 import { FALLBACK_VOICE, voiceName } from "@/lib/voices";
 import { writeManifest } from "@/lib/manifest";
@@ -15,7 +16,7 @@ const wordCount = (s: string) => s.split(/\s+/).filter(Boolean).length;
 export async function GET() {
   const rows = db
     .prepare(
-      "SELECT id,title,author,body,voice_id,voice_name,has_audio,duration_sec,word_count,char_count,cover_prompt,created_at FROM books ORDER BY id DESC",
+      "SELECT id,title,author,body,voice_id,voice_name,has_audio,duration_sec,word_count,char_count,cover_prompt,music,created_at FROM books ORDER BY id DESC",
     )
     .all() as BookRow[];
   const coversDir = join(process.cwd(), "public", "covers");
@@ -39,9 +40,10 @@ export async function POST(req: NextRequest) {
   if (!body) return NextResponse.json({ error: "body required" }, { status: 400 });
 
   const voiceId = String(b.voice_id || process.env.BRIEFLY_VOICE_ID || FALLBACK_VOICE);
+  const music = b.music === false ? 0 : 1; // ambient bed on by default
   const info = db
     .prepare(
-      "INSERT INTO books (title,author,body,voice_id,voice_name,duration_sec,word_count,char_count) VALUES (?,?,?,?,?,?,?,?)",
+      "INSERT INTO books (title,author,body,voice_id,voice_name,duration_sec,word_count,char_count,music) VALUES (?,?,?,?,?,?,?,?,?)",
     )
     .run(
       title,
@@ -52,6 +54,7 @@ export async function POST(req: NextRequest) {
       estimateSeconds(body),
       wordCount(body),
       body.length,
+      music,
     );
   const id = Number(info.lastInsertRowid);
 
@@ -59,6 +62,10 @@ export async function POST(req: NextRequest) {
     try {
       const { audio, alignment, duration } = await synthesizeBook(body, voiceId);
       writeFileSync(audioPath(id), audio);
+      // paint a soft ambient bed under the voice (best-effort; leaves the dry
+      // voice in place if ffmpeg is unavailable). Voice timing is untouched, so
+      // the karaoke alignment written below still lines up exactly.
+      if (music) await mixWithBed(audioPath(id), duration);
       // compact alignment: reconstructed text + rounded start/end times
       const round = (n: number) => Math.round(n * 1000) / 1000;
       writeFileSync(

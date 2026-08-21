@@ -25,16 +25,25 @@ CREATE TABLE IF NOT EXISTS books (
   char_count   INTEGER,
   cover_prompt TEXT,
   published    INTEGER DEFAULT 1,
+  music        INTEGER DEFAULT 1,
   created_at   TEXT DEFAULT (datetime('now'))
 );
 `);
 
-// migration for older DBs: add the publish flag (local-only vs on the site)
-try {
-  db.exec("ALTER TABLE books ADD COLUMN published INTEGER DEFAULT 1");
-} catch {
-  /* column already exists */
+// migrations for older DBs (each is a no-op once the column exists)
+for (const stmt of [
+  "ALTER TABLE books ADD COLUMN published INTEGER DEFAULT 1", // publish flag: local-only vs on the site
+  "ALTER TABLE books ADD COLUMN music INTEGER DEFAULT 1", // ambient bed mixed under the narration
+]) {
+  try {
+    db.exec(stmt);
+  } catch {
+    /* column already exists */
+  }
 }
+
+// server-side ambient bed mixed under the narration (never served to the client)
+export const bedPath = () => join(process.cwd(), "assets", "beds", "warm.mp3");
 
 // on-disk paths (written by the API) + public URLs (read by the browser)
 export const audioPath = (id: number | string) => join(PUB_AUDIO, `${id}.mp3`);
@@ -55,6 +64,7 @@ export type BookRow = {
   char_count: number | null;
   cover_prompt: string | null;
   published: number;
+  music: number;
   created_at: string;
 };
 
