@@ -180,17 +180,20 @@ export default async function Image() {
             <span style={{ color: YELLOW, fontSize: 78, fontWeight: 800 }}>_</span>
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", fontSize: 30, color: TEXT, marginTop: 20, lineHeight: 1.45, maxWidth: 560 }}>
-            <span>Hear any text read aloud and follow </span>
+          <div style={{ display: "flex", fontSize: 48, fontWeight: 800, color: "#fff", marginTop: 18, lineHeight: 1.08, letterSpacing: -1.5 }}>
+            Great books, in 5 minutes.
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", fontSize: 27, color: TEXT, marginTop: 16, lineHeight: 1.45, maxWidth: 560 }}>
+            <span>No time for the whole book? Get the big ideas out loud, with </span>
             <span style={{ color: YELLOW }}>&nbsp;every word&nbsp;</span>
-            <span> as it lands - karaoke style.</span>
+            <span> lit up as it lands.</span>
           </div>
 
           <div
             style={{
               display: "flex",
               alignSelf: "flex-start",
-              marginTop: 34,
+              marginTop: 32,
               padding: "12px 22px",
               borderRadius: 999,
               background: "rgba(226,183,20,0.12)",
@@ -200,7 +203,7 @@ export default async function Image() {
               fontWeight: 600,
             }}
           >
-            paste text · press play · follow along
+            big ideas · 5 minutes · read along
           </div>
         </div>
       </div>

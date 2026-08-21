@@ -15,39 +15,25 @@ function Feature({ k, children }: { k: string; children: React.ReactNode }) {
   );
 }
 
-function EmptyState({ onAdd }: { onAdd: () => void }) {
+function EmptyState() {
   return (
     <div style={{ maxWidth: 620, margin: "6vh auto 0", animation: "rise .4s ease" }}>
       <div className="dim" style={{ fontSize: 13, marginBottom: 8 }}>
-        {"// no books yet"}
+        {"// nothing here yet"}
       </div>
       <h1 style={{ fontSize: "clamp(26px, 5vw, 40px)", margin: "0 0 8px", fontWeight: 800, letterSpacing: "-0.01em" }}>
-        read along, <span className="accent">out loud</span>.
+        great books, <span className="accent">in 5 minutes</span>.
       </h1>
       <p className="dim" style={{ fontSize: 15, lineHeight: 1.7, margin: "0 0 26px" }}>
-        briefly turns any text into a narrated, karaoke-style read-along. paste a chapter, an
-        article, or your own writing - hear it spoken and follow every word as it lands.
+        no time for the whole book? briefly reads you the big ideas out loud and lights up every
+        word as it lands - so you can follow along and actually remember it.
       </p>
-      <ul style={{ listStyle: "none", padding: 0, margin: "0 0 30px", display: "grid", gap: 14, fontSize: 15 }}>
+      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 14, fontSize: 15 }}>
         <Feature k="01">real voice narration with natural, warm delivery</Feature>
         <Feature k="02">per-word karaoke highlight, synced to the exact audio moment</Feature>
         <Feature k="03">click any word to jump straight to it - scrub by meaning, not seconds</Feature>
         <Feature k="04">adjustable speed, light + dark, works great on your phone</Feature>
       </ul>
-      <button
-        onClick={onAdd}
-        className="focus-ring"
-        style={{
-          background: "var(--main)",
-          color: "var(--bg)",
-          fontWeight: 700,
-          padding: "12px 22px",
-          borderRadius: 10,
-          fontSize: 15,
-        }}
-      >
-        paste your first text →
-      </button>
     </div>
   );
 }
@@ -56,13 +42,11 @@ export default function Menu({
   books,
   loading,
   onOpen,
-  onAdd,
   onDelete,
 }: {
   books: Book[];
   loading: boolean;
   onOpen: (b: Book) => void;
-  onAdd: () => void;
   onDelete?: (id: number) => void;
 }) {
   if (loading) {
@@ -72,7 +56,7 @@ export default function Menu({
       </p>
     );
   }
-  if (books.length === 0) return <EmptyState onAdd={onAdd} />;
+  if (books.length === 0) return <EmptyState />;
 
   return (
     <div style={{ maxWidth: 1040, margin: "0 auto", animation: "rise .3s ease" }}>
