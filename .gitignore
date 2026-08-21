@@ -12,6 +12,10 @@ next-env.d.ts
 /data/*.db-wal
 /data/*.db-shm
 
+# local audio backups (originals kept before demucs cleaning / word surgery)
+/data/audio-bed-backup/
+/data/audio-edit-backup/
+
 # vercel
 .vercel
 
