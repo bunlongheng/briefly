@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import type { Book } from "@/lib/types";
-import { mmss } from "@/lib/types";
 import { SHELVES, catOf } from "@/lib/categories";
 import Cover from "./Cover";
 
@@ -129,21 +128,6 @@ function Tile({
           {book.title}
         </div>
       </div>
-      <span
-        style={{
-          position: "absolute",
-          top: 6,
-          left: 6,
-          fontSize: 10,
-          fontWeight: 700,
-          padding: "2px 6px",
-          borderRadius: 5,
-          background: "rgba(0,0,0,.62)",
-          color: "#fff",
-        }}
-      >
-        {mmss(book.duration_sec ?? 0)}
-      </span>
     </div>
   );
 }
@@ -176,10 +160,11 @@ function ShelfCard({
       <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 700, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", maxHeight: "2.6em", overflow: "hidden" }}>
         {book.title}
       </div>
-      <div className="dim" style={{ fontSize: 11, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-        {mmss(book.duration_sec ?? 0)}
-        {book.author ? ` · ${book.author}` : ""}
-      </div>
+      {book.author && (
+        <div className="dim" style={{ fontSize: 11, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {book.author}
+        </div>
+      )}
     </div>
   );
 }

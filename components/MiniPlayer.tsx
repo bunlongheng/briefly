@@ -143,19 +143,21 @@ export default function MiniPlayer({
             width: 44,
             height: 44,
             flexShrink: 0,
+            borderRadius: 999,
+            background: "var(--main)",
+            color: "var(--bg-deep)",
             display: "grid",
             placeItems: "center",
-            color: "var(--text)",
           }}
         >
           {playing ? (
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
-              <rect x="6" y="4" width="4" height="16" rx="1" />
-              <rect x="14" y="4" width="4" height="16" rx="1" />
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+              <rect x="6" y="4" width="4.5" height="16" rx="1" />
+              <rect x="13.5" y="4" width="4.5" height="16" rx="1" />
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z" />
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+              <path d="M8 5l11 7-11 7z" />
             </svg>
           )}
         </button>
