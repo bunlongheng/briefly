@@ -350,67 +350,14 @@ export default function Reader({
           bottom: 0,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: 900, margin: "0 auto" }}>
-          <button
-            onClick={() => seekTo((audioRef.current?.currentTime || 0) - 10)}
-            className="skip-btn focus-ring"
-            aria-label="Back 10 seconds"
-            title="Back 10s"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M11 8L6 12l5 4V8zM18 8l-5 4 5 4V8z" fill="currentColor" stroke="none" />
-            </svg>
-            <span className="skip-num">10</span>
-          </button>
-
-          <button
-            onClick={toggle}
-            className="focus-ring"
-            aria-label={playing ? "Pause" : "Play"}
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 999,
-              background: "var(--main)",
-              color: "var(--bg)",
-              display: "grid",
-              placeItems: "center",
-              flexShrink: 0,
-            }}
-          >
-            {playing ? (
-              <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
-                <rect x="6" y="5" width="4" height="14" rx="1" />
-                <rect x="14" y="5" width="4" height="14" rx="1" />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
-                <path d="M8 5l11 7-11 7z" />
-              </svg>
-            )}
-          </button>
-
-          <button
-            onClick={() => seekTo((audioRef.current?.currentTime || 0) + 10)}
-            className="skip-btn focus-ring"
-            aria-label="Forward 10 seconds"
-            title="Forward 10s"
-          >
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M13 8l5 4-5 4V8zM6 8l5 4-5 4V8z" fill="currentColor" stroke="none" />
-            </svg>
-            <span className="skip-num">10</span>
-          </button>
-
-          <span className="dim" style={{ fontSize: 12, width: 40, textAlign: "right" }}>{mmss(cur)}</span>
-
-          {/* seek bar */}
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          {/* full-width seek bar, times underneath - YT Music style */}
           <div
             onClick={(e) => {
               const r = e.currentTarget.getBoundingClientRect();
               seekTo(((e.clientX - r.left) / r.width) * dur);
             }}
-            style={{ flex: 1, minWidth: 0, height: 18, display: "flex", alignItems: "center", cursor: "pointer" }}
+            style={{ height: 18, display: "flex", alignItems: "center", cursor: "pointer" }}
           >
             <div style={{ position: "relative", width: "100%", height: 4, background: "var(--sub-alt)", borderRadius: 999 }}>
               <div style={{ position: "absolute", inset: 0, width: `${pct}%`, background: "var(--main)", borderRadius: 999 }} />
@@ -419,8 +366,8 @@ export default function Reader({
                   position: "absolute",
                   left: `${pct}%`,
                   top: "50%",
-                  width: 10,
-                  height: 10,
+                  width: 12,
+                  height: 12,
                   borderRadius: 999,
                   background: "var(--main)",
                   transform: "translate(-50%, -50%)",
@@ -428,20 +375,80 @@ export default function Reader({
               />
             </div>
           </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 2 }}>
+            <span className="dim" style={{ fontSize: 12 }}>{mmss(cur)}</span>
+            <span className="dim" style={{ fontSize: 12 }}>{mmss(dur)}</span>
+          </div>
 
-          <span className="dim" style={{ fontSize: 12, width: 40 }}>{mmss(dur)}</span>
+          {/* control row: rate | back 10 | big play | fwd 10 | share spacer */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "clamp(18px, 6vw, 44px)", marginTop: 4 }}>
+            <button
+              onClick={() => applyRate(RATES[(RATES.indexOf(rate) + 1) % RATES.length])}
+              className="focus-ring"
+              aria-label="Playback speed"
+              title="Playback speed"
+              style={{ color: "var(--sub)", fontSize: 14, fontWeight: 700, width: 44, textAlign: "center" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--main)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--sub)")}
+            >
+              {rate}x
+            </button>
 
-          <button
-            onClick={() => applyRate(RATES[(RATES.indexOf(rate) + 1) % RATES.length])}
-            className="focus-ring"
-            aria-label="Playback speed"
-            title="Playback speed"
-            style={{ color: "var(--sub)", fontSize: 13, fontWeight: 700, width: 44, textAlign: "center" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--main)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--sub)")}
-          >
-            {rate}x
-          </button>
+            <button
+              onClick={() => seekTo((audioRef.current?.currentTime || 0) - 10)}
+              className="skip-btn focus-ring"
+              aria-label="Back 10 seconds"
+              title="Back 10s"
+            >
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+                <path d="M11 7L5 12l6 5V7zM19 7l-6 5 6 5V7z" />
+              </svg>
+              <span className="skip-num">10</span>
+            </button>
+
+            <button
+              onClick={toggle}
+              className="focus-ring"
+              aria-label={playing ? "Pause" : "Play"}
+              style={{
+                width: 68,
+                height: 68,
+                borderRadius: 999,
+                background: "var(--main)",
+                color: "var(--bg-deep)",
+                display: "grid",
+                placeItems: "center",
+                flexShrink: 0,
+                boxShadow: "0 4px 18px color-mix(in srgb, var(--main) 35%, transparent)",
+              }}
+            >
+              {playing ? (
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true">
+                  <rect x="6" y="4" width="4.5" height="16" rx="1" />
+                  <rect x="13.5" y="4" width="4.5" height="16" rx="1" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5l11 7-11 7z" />
+                </svg>
+              )}
+            </button>
+
+            <button
+              onClick={() => seekTo((audioRef.current?.currentTime || 0) + 10)}
+              className="skip-btn focus-ring"
+              aria-label="Forward 10 seconds"
+              title="Forward 10s"
+            >
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor" aria-hidden="true">
+                <path d="M13 7l6 5-6 5V7zM5 7l6 5-6 5V7z" />
+              </svg>
+              <span className="skip-num">10</span>
+            </button>
+
+            {/* mirror the rate button's width so the play circle stays centered */}
+            <span style={{ width: 44 }} aria-hidden="true" />
+          </div>
         </div>
       </footer>
 
