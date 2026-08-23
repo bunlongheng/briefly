@@ -158,6 +158,27 @@ export default function Reader({
     }
   }, []);
 
+  // persist listening position so the library's mini player can resume it
+  const saveProgress = useCallback(() => {
+    const a = audioRef.current;
+    if (!a || !a.duration) return;
+    try {
+      if (a.ended || a.currentTime >= a.duration - 2) localStorage.removeItem("briefly:last");
+      else if (a.currentTime > 1)
+        localStorage.setItem("briefly:last", JSON.stringify({ id: book.id, t: a.currentTime }));
+    } catch {
+      /* private mode - progress just won't persist */
+    }
+  }, [book.id]);
+  useEffect(() => {
+    if (!playing) return;
+    const iv = setInterval(saveProgress, 3000);
+    return () => {
+      clearInterval(iv);
+      saveProgress();
+    };
+  }, [playing, saveProgress]);
+
   // seek helper - also snaps the caret immediately (don't wait for the rAF loop)
   const seekTo = useCallback(
     (t: number) => {

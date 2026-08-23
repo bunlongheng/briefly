@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import type { Book } from "@/lib/types";
 import { mmss } from "@/lib/types";
+import { SHELVES, catOf } from "@/lib/categories";
 import Cover from "./Cover";
 
 function Feature({ k, children }: { k: string; children: React.ReactNode }) {
@@ -38,17 +40,191 @@ function EmptyState() {
   );
 }
 
+function DeleteBtn({ book, onDelete }: { book: Book; onDelete: (id: number) => void }) {
+  return (
+    <button
+      className="book-del focus-ring"
+      aria-label={`Delete ${book.title}`}
+      title="Delete"
+      onClick={(e) => {
+        e.stopPropagation();
+        if (confirm(`Delete "${book.title}"? This removes its audio too.`)) onDelete(book.id);
+      }}
+      style={{
+        position: "absolute",
+        top: 6,
+        right: 6,
+        zIndex: 2,
+        width: 26,
+        height: 26,
+        borderRadius: 7,
+        display: "grid",
+        placeItems: "center",
+        background: "color-mix(in srgb, var(--bg-deep) 78%, transparent)",
+        color: "var(--sub)",
+        backdropFilter: "blur(2px)",
+      }}
+    >
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6" />
+      </svg>
+    </button>
+  );
+}
+
+// speed-dial tile: cover fills the tile, title overlaid on a bottom gradient
+function Tile({
+  book,
+  onOpen,
+  onDelete,
+}: {
+  book: Book;
+  onOpen: (b: Book) => void;
+  onDelete?: (id: number) => void;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(book)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen(book)}
+      className="yt-tile focus-ring"
+      style={{
+        position: "relative",
+        aspectRatio: "1 / 1",
+        borderRadius: 12,
+        overflow: "hidden",
+        cursor: "pointer",
+        background: "var(--card)",
+        border: "1px solid var(--sub-alt)",
+      }}
+    >
+      {onDelete && <DeleteBtn book={book} onDelete={onDelete} />}
+      <Cover
+        id={book.id}
+        title={book.title}
+        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: "auto 0 0 0",
+          padding: "26px 9px 8px",
+          background: "linear-gradient(transparent, rgba(0,0,0,.82))",
+          color: "#fff",
+          fontSize: 12.5,
+          fontWeight: 700,
+          lineHeight: 1.25,
+        }}
+      >
+        <div
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            maxHeight: "2.5em",
+            overflow: "hidden",
+          }}
+        >
+          {book.title}
+        </div>
+      </div>
+      <span
+        style={{
+          position: "absolute",
+          top: 6,
+          left: 6,
+          fontSize: 10,
+          fontWeight: 700,
+          padding: "2px 6px",
+          borderRadius: 5,
+          background: "rgba(0,0,0,.62)",
+          color: "#fff",
+        }}
+      >
+        {mmss(book.duration_sec ?? 0)}
+      </span>
+    </div>
+  );
+}
+
+// shelf card: cover with title + meta beneath (YT playlist-card style)
+function ShelfCard({
+  book,
+  onOpen,
+  onDelete,
+}: {
+  book: Book;
+  onOpen: (b: Book) => void;
+  onDelete?: (id: number) => void;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(book)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen(book)}
+      className="yt-tile focus-ring"
+      style={{ position: "relative", width: 148, flexShrink: 0, cursor: "pointer", scrollSnapAlign: "start" }}
+    >
+      {onDelete && <DeleteBtn book={book} onDelete={onDelete} />}
+      <Cover
+        id={book.id}
+        title={book.title}
+        style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: 12, objectFit: "cover", border: "1px solid var(--sub-alt)" }}
+      />
+      <div style={{ marginTop: 7, fontSize: 12.5, fontWeight: 700, lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", maxHeight: "2.6em", overflow: "hidden" }}>
+        {book.title}
+      </div>
+      <div className="dim" style={{ fontSize: 11, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+        {mmss(book.duration_sec ?? 0)}
+        {book.author ? ` · ${book.author}` : ""}
+      </div>
+    </div>
+  );
+}
+
 export default function Menu({
   books,
   loading,
+  lastPlayedId,
   onOpen,
   onDelete,
 }: {
   books: Book[];
   loading: boolean;
+  lastPlayedId?: number | null;
   onOpen: (b: Book) => void;
   onDelete?: (id: number) => void;
 }) {
+  const [chip, setChip] = useState("all");
+
+  const chips = useMemo(() => {
+    const present = new Set(books.map((b) => catOf(b.id)));
+    return ["all", ...SHELVES.filter((s) => present.has(s))];
+  }, [books]);
+
+  // speed dial: last played first, then newest
+  const dial = useMemo(() => {
+    const sorted = [...books].sort((a, b) => b.id - a.id);
+    const last = sorted.find((b) => b.id === lastPlayedId);
+    const rest = sorted.filter((b) => b.id !== lastPlayedId);
+    return (last ? [last, ...rest] : rest).slice(0, 9);
+  }, [books, lastPlayedId]);
+
+  const shelves = useMemo(
+    () =>
+      SHELVES.map((s) => ({ name: s, items: books.filter((b) => catOf(b.id) === s) })).filter(
+        (s) => s.items.length > 0,
+      ),
+    [books],
+  );
+
+  const filtered = useMemo(
+    () => (chip === "all" ? books : books.filter((b) => catOf(b.id) === chip)),
+    [books, chip],
+  );
+
   if (loading) {
     return (
       <p className="dim" style={{ textAlign: "center", marginTop: "20vh" }}>
@@ -60,119 +236,96 @@ export default function Menu({
 
   return (
     <div style={{ maxWidth: 1040, margin: "0 auto", animation: "rise .3s ease" }}>
-      <div className="dim" style={{ fontSize: 13, margin: "0 4px 16px" }}>
-        {"// "}
-        {books.length} book{books.length === 1 ? "" : "s"}
-      </div>
+      {/* chip row */}
       <div
+        className="chip-row"
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
-          gap: 14,
+          display: "flex",
+          gap: 8,
+          overflowX: "auto",
+          padding: "2px 2px 14px",
+          scrollbarWidth: "none",
         }}
       >
-        {books.map((b) => (
-          <div
-            key={b.id}
-            role="button"
-            tabIndex={0}
-            onClick={() => onOpen(b)}
-            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen(b)}
-            className="book-card focus-ring"
+        {chips.map((c) => (
+          <button
+            key={c}
+            onClick={() => setChip(c)}
+            className="focus-ring"
             style={{
-              position: "relative",
-              textAlign: "left",
-              background: "var(--card)",
+              flexShrink: 0,
+              padding: "7px 14px",
+              borderRadius: 8,
+              fontSize: 13.5,
+              fontWeight: 600,
+              background: chip === c ? "var(--main)" : "var(--card)",
+              color: chip === c ? "var(--bg-deep)" : "var(--text)",
               border: "1px solid var(--sub-alt)",
-              borderRadius: 12,
-              padding: 9,
-              display: "flex",
-              flexDirection: "column",
-              gap: 9,
-              cursor: "pointer",
-              transition: "transform .15s ease, border-color .15s ease, background .15s ease",
+              transition: "background .15s ease, color .15s ease",
             }}
           >
-            {onDelete && (
-              <button
-                className="book-del focus-ring"
-                aria-label={`Delete ${b.title}`}
-                title="Delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (confirm(`Delete "${b.title}"? This removes its audio too.`)) onDelete(b.id);
-                }}
-                style={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  width: 26,
-                  height: 26,
-                  borderRadius: 7,
-                  display: "grid",
-                  placeItems: "center",
-                  background: "color-mix(in srgb, var(--bg-deep) 78%, transparent)",
-                  color: "var(--sub)",
-                  backdropFilter: "blur(2px)",
-                }}
-              >
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6" />
-                </svg>
-              </button>
-            )}
-            <Cover
-              id={b.id}
-              title={b.title}
-              className="book-cover"
-              style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: 10, objectFit: "cover" }}
-            />
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  lineHeight: 1.25,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {b.title}
-              </div>
-              <div
-                className="dim"
-                style={{
-                  fontSize: 10.5,
-                  marginTop: 3,
-                  display: "flex",
-                  gap: 6,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                <span>{mmss(b.duration_sec ?? 0)}</span>
-                {b.author ? (
-                  <>
-                    <span>·</span>
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{b.author}</span>
-                  </>
-                ) : null}
-                {!b.has_audio ? <span style={{ color: "var(--error)" }}>· no audio</span> : null}
-              </div>
-            </div>
-          </div>
+            {c}
+          </button>
         ))}
       </div>
+
+      {chip !== "all" ? (
+        /* filtered view: plain tile grid for the picked chip */
+        <div className="dial-grid" style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(var(--dial-cols, 3), minmax(0, 1fr))" }}>
+          {filtered.map((b) => (
+            <Tile key={b.id} book={b} onOpen={onOpen} onDelete={onDelete} />
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* speed dial */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "6px 0 14px" }}>
+            <div>
+              <div className="dim" style={{ fontSize: 11, fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>
+                {"// briefly library"}
+              </div>
+              <div style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em" }}>speed dial</div>
+            </div>
+          </div>
+          <div className="dial-grid" style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(var(--dial-cols, 3), minmax(0, 1fr))" }}>
+            {dial.map((b) => (
+              <Tile key={b.id} book={b} onOpen={onOpen} onDelete={onDelete} />
+            ))}
+          </div>
+
+          {/* category shelves */}
+          {shelves.map((s) => (
+            <section key={s.name} style={{ marginTop: 30 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 12px", letterSpacing: "-0.01em" }}>
+                {s.name}
+              </h2>
+              <div
+                className="chip-row"
+                style={{
+                  display: "flex",
+                  gap: 12,
+                  overflowX: "auto",
+                  paddingBottom: 6,
+                  scrollSnapType: "x proximity",
+                  scrollbarWidth: "none",
+                }}
+              >
+                {s.items.map((b) => (
+                  <ShelfCard key={b.id} book={b} onOpen={onOpen} onDelete={onDelete} />
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
+      )}
+
       <style>{`
-        .book-card:hover {
-          transform: translateY(-3px);
-          border-color: var(--main);
-          background: var(--card-hi);
-        }
+        .chip-row::-webkit-scrollbar { display: none; }
+        @media (min-width: 760px) { .dial-grid { --dial-cols: 6; } }
+        .yt-tile { transition: transform .15s ease; }
+        .yt-tile:hover { transform: translateY(-3px); }
         .book-del { opacity: 0; transition: opacity .15s ease, color .15s ease, background .15s ease; }
-        .book-card:hover .book-del, .book-del:focus-visible { opacity: 1; }
+        .yt-tile:hover .book-del, .book-del:focus-visible { opacity: 1; }
         .book-del:hover { color: var(--error); }
         @media (hover: none) { .book-del { opacity: 1; } }
       `}</style>

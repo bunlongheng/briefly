@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Book } from "@/lib/types";
 import Menu from "@/components/Menu";
+import MiniPlayer from "@/components/MiniPlayer";
 import Reader from "@/components/Reader";
 import ThemeToggle, { useTheme } from "@/components/ThemeToggle";
 
@@ -11,6 +12,18 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState<Book | null>(null);
   const [startAt, setStartAt] = useState(0);
+  // last-played book + position (saved by Reader and MiniPlayer) drives the bar
+  const [last, setLast] = useState<{ id: number; t: number } | null>(null);
+  const readLast = useCallback(() => {
+    try {
+      setLast(JSON.parse(localStorage.getItem("briefly:last") || "null"));
+    } catch {
+      setLast(null);
+    }
+  }, []);
+  useEffect(() => {
+    readLast();
+  }, [readLast]);
   // true only when the writable local API served the data - the static public
   // deploy reads books.json, where add/delete would just 401. Gates the UI.
   const [canManage, setCanManage] = useState(false);
@@ -84,9 +97,12 @@ export default function App() {
         onBack={() => {
           setStartAt(0);
           setOpen(null);
+          readLast();
         }}
       />
     );
+
+  const lastBook = last ? books.find((b) => b.id === last.id) : undefined;
 
   return (
     <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
@@ -113,14 +129,32 @@ export default function App() {
         </div>
       </header>
 
-      <main style={{ flex: 1, padding: "10px 22px 60px", width: "100%" }}>
+      <main
+        style={{
+          flex: 1,
+          padding: `10px 22px calc(${lastBook ? "88px" : "60px"} + env(safe-area-inset-bottom))`,
+          width: "100%",
+        }}
+      >
         <Menu
           books={books}
           loading={loading}
+          lastPlayedId={lastBook?.id ?? null}
           onOpen={setOpen}
           onDelete={canManage ? onDelete : undefined}
         />
       </main>
+
+      {lastBook && (
+        <MiniPlayer
+          book={lastBook}
+          startAt={last?.t ?? 0}
+          onExpand={(b, t) => {
+            setStartAt(t);
+            setOpen(b);
+          }}
+        />
+      )}
     </div>
   );
 }
