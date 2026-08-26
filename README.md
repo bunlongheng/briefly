@@ -1,3 +1,13 @@
+<div align="center">
+  <img src="docs/icon.png" alt="Briefly" width="96" height="96" />
+  <h1>Briefly</h1>
+  <p><em>Paste any text, hear it read aloud, and follow along word by word, karaoke style</em></p>
+  <p><a href="https://briefly-bheng.vercel.app">Live</a> &middot; <a href="https://github.com/bunlongheng/briefly">Repo</a> &middot; <a href="https://bunlongheng.com/projects?name=briefly">Portfolio</a></p>
+  <img src="docs/social-preview.png" alt="Briefly - preview" width="820" />
+</div>
+
+---
+
 # Briefly
 
 Paste any text, hear it read aloud, and follow along word-by-word - karaoke style, with the caret landing on the exact letter being spoken.
